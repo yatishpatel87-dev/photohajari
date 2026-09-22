@@ -1,0 +1,10 @@
+{
+  "name": "ધોરણ ૭ ફોટો હાજરી - Class 7 Photo Attendance",
+  "description": "ભીખાપુરા પ્રાથમિક શાળા (Bhikhapura Primary School, Ta. Halol, Dist. Panchmahal, DISE 24170303201) ધોરણ ૭ દૈનિક ફોટો હાજરી પ્રણાલી.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
