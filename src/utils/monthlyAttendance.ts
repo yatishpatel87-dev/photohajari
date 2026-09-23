@@ -213,8 +213,25 @@ export function generateMonthSeedAttendance(
 ): AttendanceDatabase {
   const seedDb: AttendanceDatabase = {};
   const daysInMonth = new Date(year, month, 0).getDate();
+  const now = new Date();
+  const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === month;
+  const currentDay = now.getDate();
 
   for (let day = 1; day <= daysInMonth; day++) {
+    // If it's the current month, DO NOT seed today or future days!
+    // Today must remain completely fresh/empty so today's attendance can be newly taken!
+    if (isCurrentMonth && day >= currentDay) {
+      continue;
+    }
+
+    // If it's a future month completely, skip
+    if (
+      year > now.getFullYear() ||
+      (year === now.getFullYear() && month > now.getMonth() + 1)
+    ) {
+      continue;
+    }
+
     const dateObj = new Date(year, month - 1, day);
     // Skip Sundays (0)
     if (dateObj.getDay() === 0) continue;

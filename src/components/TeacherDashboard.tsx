@@ -871,9 +871,10 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               type="button"
               onClick={onResetDay}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              title="આજના દિવસની હાજરી ખાલી કરીને નવી શરૂ કરો"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>આજની હાજરી રીસેટ</span>
+              <span>આજની હાજરી નવી શરૂ કરો</span>
             </button>
           </div>
         </div>

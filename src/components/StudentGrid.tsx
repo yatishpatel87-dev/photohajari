@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Volume2, VolumeX, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Search, Volume2, VolumeX, CheckCircle2, AlertCircle, Sparkles, RotateCcw, Calendar } from 'lucide-react';
 import { Student, DayAttendance } from '../types';
 import { StudentCard } from './StudentCard';
-import { formatGujaratiDigits } from '../utils/storage';
+import { formatGujaratiDigits, formatDisplayDate } from '../utils/storage';
 
 interface StudentGridProps {
   students: Student[];
@@ -11,6 +11,8 @@ interface StudentGridProps {
   onToggleAttendance: (studentId: string) => void;
   voiceFeedback: boolean;
   onToggleVoice: () => void;
+  onResetToday?: () => void;
+  dateStr?: string;
 }
 
 type FilterMode = 'all' | 'unmarked' | 'present' | 'boys' | 'girls';
@@ -21,9 +23,15 @@ export const StudentGrid: React.FC<StudentGridProps> = ({
   onToggleAttendance,
   voiceFeedback,
   onToggleVoice,
+  onResetToday,
+  dateStr,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
+
+  const displayDate = useMemo(() => {
+    return dateStr ? formatDisplayDate(dateStr) : null;
+  }, [dateStr]);
 
   const stats = useMemo(() => {
     const total = students.length;
@@ -103,7 +111,10 @@ export const StudentGrid: React.FC<StudentGridProps> = ({
           {/* Quick Attendance Live Progress Gauge */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 min-w-[240px]">
             <div className="flex items-center justify-between text-sm font-semibold mb-1.5">
-              <span>આજની હાજરી</span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-blue-200" />
+                <span>આજની હાજરી</span>
+              </span>
               <span className="text-amber-300 font-bold text-base">
                 {formatGujaratiDigits(stats.present)} / {formatGujaratiDigits(stats.total)}
               </span>
@@ -120,6 +131,32 @@ export const StudentGrid: React.FC<StudentGridProps> = ({
             <div className="flex justify-between items-center text-xs text-blue-100 mt-2">
               <span>{formatGujaratiDigits(stats.percentage)}% હાજર</span>
               <span>{formatGujaratiDigits(stats.absent)} બાકી</span>
+            </div>
+
+            {/* Daily Fresh Status & Quick Reset Button */}
+            <div className="mt-2.5 pt-2 border-t border-white/15 flex items-center justify-between gap-2 text-[11px]">
+              {stats.present === 0 ? (
+                <div className="flex items-center gap-1 text-emerald-300 font-bold">
+                  <Sparkles className="w-3 h-3 text-amber-300 shrink-0" />
+                  <span>આજની નવી હાજરી માટે તૈયાર</span>
+                </div>
+              ) : (
+                <div className="text-blue-100 font-medium">
+                  {formatGujaratiDigits(stats.present)} વિદ્યાર્થી હાજર નોંધાયા
+                </div>
+              )}
+
+              {onResetToday && (
+                <button
+                  type="button"
+                  onClick={onResetToday}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-[11px] font-semibold transition-all cursor-pointer border border-white/20 hover:scale-102"
+                  title="આજની હાજરી ફરીથી નવી શરૂ કરો (રીસેટ)"
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>નવી શરૂ કરો</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -86,20 +86,47 @@ export function loadAllAttendance(): AttendanceDatabase {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(ATTENDANCE_KEY);
+    const now = new Date();
+    const todayStr = getTodayDateString();
+
+    let db: AttendanceDatabase = {};
+
     if (!raw) {
-      const now = new Date();
-      const initialDb = generateMonthSeedAttendance(DEFAULT_STUDENTS, now.getFullYear(), now.getMonth() + 1);
-      localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(initialDb));
-      return initialDb;
+      db = generateMonthSeedAttendance(DEFAULT_STUDENTS, now.getFullYear(), now.getMonth() + 1);
+    } else {
+      const parsed = JSON.parse(raw);
+      if (!parsed || Object.keys(parsed).length === 0) {
+        db = generateMonthSeedAttendance(DEFAULT_STUDENTS, now.getFullYear(), now.getMonth() + 1);
+      } else {
+        db = parsed;
+      }
     }
-    const parsed = JSON.parse(raw);
-    if (!parsed || Object.keys(parsed).length === 0) {
-      const now = new Date();
-      const initialDb = generateMonthSeedAttendance(DEFAULT_STUDENTS, now.getFullYear(), now.getMonth() + 1);
-      localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(initialDb));
-      return initialDb;
+
+    let modified = false;
+
+    // 1. Remove all future dates (if any existed from previous seed)
+    Object.keys(db).forEach((dateKey) => {
+      if (dateKey > todayStr) {
+        delete db[dateKey];
+        modified = true;
+      }
+    });
+
+    // 2. Ensure today's date starts fresh if it was pre-populated by mock seed
+    const SEED_CLEANUP_KEY = 'dhoran_7_seed_cleaned_v3';
+    if (!localStorage.getItem(SEED_CLEANUP_KEY)) {
+      if (db[todayStr]) {
+        delete db[todayStr];
+        modified = true;
+      }
+      localStorage.setItem(SEED_CLEANUP_KEY, 'true');
     }
-    return parsed;
+
+    if (modified || !raw) {
+      localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(db));
+    }
+
+    return db;
   } catch (e) {
     console.error('Failed to load attendance:', e);
     return {};

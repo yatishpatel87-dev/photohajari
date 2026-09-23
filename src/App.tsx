@@ -44,6 +44,29 @@ export default function App() {
     saveStudents(students);
   }, [students]);
 
+  // Keep date synchronized with current day so each new day automatically starts with fresh attendance
+  useEffect(() => {
+    const handleDayCheck = () => {
+      const todayStr = getTodayDateString();
+      if (selectedDate !== todayStr) {
+        setSelectedDate(todayStr);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleDayCheck();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleDayCheck);
+    return () => {
+      document.removeEventListener('visibilitychange', handleDayCheck);
+      window.removeEventListener('focus', handleDayCheck);
+    };
+  }, [selectedDate]);
+
   // Toggle student attendance (used in Student Photo mode when kid taps their photo)
   const handleToggleAttendance = useCallback(
     (studentId: string) => {
@@ -235,6 +258,8 @@ export default function App() {
             onToggleAttendance={handleToggleAttendance}
             voiceFeedback={voiceFeedback}
             onToggleVoice={() => setVoiceFeedback(!voiceFeedback)}
+            onResetToday={handleResetDay}
+            dateStr={selectedDate}
           />
         ) : (
           <TeacherDashboard
@@ -292,9 +317,10 @@ export default function App() {
       {/* Reset Day Attendance Confirmation Modal */}
       <ConfirmModal
         isOpen={showResetDayConfirm}
-        title="આજની હાજરી રીસેટ કરો"
-        message="શું તમે આજના દિવસ માટે નોંધાયેલ તમામ હાજરી રદ કરીને ફરીથી શરૂ કરવા માંગો છો?"
-        confirmLabel="હા, હાજરી રીસેટ કરો"
+        title="આજની હાજરી નવી શરૂ કરો (Start Fresh)"
+        message="શું તમે આજના દિવસ માટે નોંધાયેલ તમામ હાજરી રદ કરીને નવી તાજી હાજરી શરૂ કરવા માંગો છો?"
+        subMessage="આજના દિવસની તમામ હાજરી ખાલી થશે જેથી નવા વિદ્યાર્થીઓ હાજરી પૂરી શકે."
+        confirmLabel="હા, નવી હાજરી શરૂ કરો"
         cancelLabel="રદ કરો"
         variant="warning"
         onConfirm={handleConfirmResetDay}
